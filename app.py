@@ -21,22 +21,22 @@
 #  
 
 class App(object):
-	
-	def __init__(self):
-		self.html = \
-		b"""
-			<html>
-				<head>
-					<title>Amazonia App</title>
-				</head>
-				<body>
-					<h1>Amazonia App is working!</h1>
-				</body>
-			</html>
-		"""
-		
-	def __call__(self, environ, start_response):
-		start_response("200 OK", [("Content-type", "text/html"),
-										('Content-Length', str(len(self.html)))])
-		
-		return [self.html]
+    
+    def __init__(self):
+        self.html = \
+        b"""
+            <html>
+                <head>
+                    <title>Amazonia App</title>
+                </head>
+                <body>
+                    <h1>Amazonia App is working!</h1>
+                </body>
+            </html>
+        """
+        
+    def __call__(self, environ, start_response):
+        start_response("200 OK", [("Content-type", "text/html"),
+                                        ('Content-Length', str(len(self.html)))])
+        
+        return [self.html]
