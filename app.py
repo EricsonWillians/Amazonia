@@ -22,18 +22,19 @@
 
 class App(object):
     
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.html = \
-        b"""
+        str.encode("""
             <html>
                 <head>
-                    <title>Amazonia App</title>
+                    <title>{name}</title>
                 </head>
                 <body>
                     <h1>Amazonia App is working!</h1>
                 </body>
             </html>
-        """
+        """.format(name = self.name))
         
     def __call__(self, environ, start_response):
         start_response("200 OK", [("Content-type", "text/html"),
