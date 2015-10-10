@@ -20,14 +20,14 @@
 #  
 #  
 
-from Amazonia.app import App
+from Amazonia.main import WebApp
 
 # This example class outputs the entire environment dictionary.
 
-class EnvPrinter(App):
+class EnvPrinter(WebApp):
     
     def __init__(self):
-        App.__init__(self, "Env Printer")
+        WebApp.__init__(self, "Env Printer")
         
     def __call__(self, environ, start_response):
         start_response("200 OK", [("Content-type", "text/html")])
