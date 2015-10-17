@@ -20,7 +20,19 @@
 #  
 #  
 
+from paste import httpserver
 from bs4 import BeautifulSoup
+
+class Server(object):
+	
+	def __init__(self, webapp, host="127.0.0.1", port="8080"):
+		httpserver.serve(webapp, host, port)
+
+class ServerResource(object):
+	
+	def __init__(self, path, enc="utf-8"):
+		self.resource = open(path, 'r', encoding=enc)
+		self.content = self.resource.read()
 
 class WebPage(object):
 	
@@ -82,10 +94,23 @@ class WebPage(object):
 
 class WebApp(object):
 	
-	def __init__(self, webpage):
-		self.webpage = webpage
-		
+	MIME_TABLE = {
+		".txt": "text/plain",
+		".css": "text/css",
+		".js": "application/javascript",
+	}
+	
+	def __init__(self, root_path):
+		self.root_path = root_path
+	
 	def __call__(self, environ, start_response):
-		start_response("200 OK", [("Content-type", "text/html")])
-		
-		return [str.encode(self.webpage.html)]
+		path_info = environ["PATH_INFO"]
+		for ext in WebApp.MIME_TABLE.keys():
+			if path_info.endswith(ext):
+				res = ServerResource(self.root_path + path_info).content
+				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
+				return [str.encode(res)]
+			elif path_info == "/" or "/index.html":
+				res = ServerResource(self.root_path + "/index.html").content
+				start_response("200 OK", [("Content-type", "text/html")])
+				return [str.encode(res)]
