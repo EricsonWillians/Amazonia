@@ -22,6 +22,7 @@
 
 from paste import httpserver
 from bs4 import BeautifulSoup
+import re, glob, os
 
 class Server(object):
 	
@@ -70,21 +71,33 @@ class WebPage(object):
 					self.soup.head.insert(0, new_soup.find("meta"))
 			self.update_document()
 
-	def link_css(self, *links):
+	def add_glob(self, links, put_link):
 		if links:
 			for link in links:
-				new_soup = BeautifulSoup('<link rel="stylesheet", \
-					href="{external_css}", type="text/css">'.format(external_css = link), "lxml")
-				self.soup.head.insert(0, new_soup.find("link"))
-			self.update_document()
+				if re.search('\*\.(\*|[a-zA-Z]+)', link):
+					# It is a glob search string
+					for filename in glob.glob(link):
+						basename = os.path.basename(filename)
+						dirname = os.path.dirname(link)
+						dirname = re.sub('^\.', '', dirname)
+						link_url = os.path.join(dirname, basename).replace('\\', '/')
+						put_link(link_url)
+				else:
+					put_link(link)
+
+	def link_css(self, *links):
+		def add_link(link):
+			new_soup = BeautifulSoup('<link rel="stylesheet", \
+				href="{external_css}", type="text/css">'.format(external_css = link), "lxml")
+			self.soup.head.insert(0, new_soup.find("link"))
+		self.add_glob(links, add_link)
 	
 	def link_js(self, *links):
-		if links:
-			for link in links:
-				new_soup = BeautifulSoup('<script language="javascript", \
-					src="{external_js}", type="text/javascript"></script>'.format(external_js = link), "lxml")
-				self.soup.head.insert(0, new_soup.find("link"))
-			self.update_document()
+		def add_script(link):
+			new_soup = BeautifulSoup('<script language="javascript", \
+				src="{external_js}", type="text/javascript"></script>'.format(external_js = link), "lxml")
+			self.soup.head.insert(0, new_soup.find("link"))
+		self.add_glob(links, add_script)
 	
 	def update_document(self):
 		self.html = self.__str__()
@@ -100,7 +113,8 @@ class WebApp(object):
 		".js": "application/javascript",
 	}
 	
-	def __init__(self, root_path):
+	def __init__(self, resource=None, root_path='./'):
+		self.resource = resource
 		self.root_path = root_path
 	
 	def __call__(self, environ, start_response):
@@ -111,6 +125,10 @@ class WebApp(object):
 				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
 				return [str.encode(res)]
 			elif path_info == "/" or "/index.html":
-				res = ServerResource(self.root_path + "/index.html").content
+				res = ''
+				if self.resource is not None:
+					res = str(self.resource)
+				else:
+					res = ServerResource(self.root_path + "/index.html").content
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
