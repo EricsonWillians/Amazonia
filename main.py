@@ -84,6 +84,7 @@ class WebPage(object):
 						put_link(link_url)
 				else:
 					put_link(link)
+			self.update_document()
 
 	def link_css(self, *links):
 		def add_link(link):
