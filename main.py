@@ -22,6 +22,7 @@
 
 from paste import httpserver
 from bs4 import BeautifulSoup
+from binascii import hexlify
 
 class Server(object):
 	
@@ -30,9 +31,25 @@ class Server(object):
 
 class ServerResource(object):
 	
+	MEDIA_EXTENSIONS = [
+		".jpg",
+		".jpeg",
+		".png",
+		".gif",
+		".wav",
+		".mp3",
+		".avi",
+		".wma"
+	]
+	
 	def __init__(self, path, enc="utf-8"):
-		self.resource = open(path, 'r', encoding=enc)
-		self.content = self.resource.read()
+		for ext in ServerResource.MEDIA_EXTENSIONS:
+			if path.endswith(ext):
+				with open(path, "rb") as f:
+					self.content = f.read()
+			else:
+				with open(path, 'r', encoding=enc) as f:
+					self.content = f.read()
 
 class WebPage(object):
 	
@@ -98,6 +115,8 @@ class WebApp(object):
 		".txt": "text/plain",
 		".css": "text/css",
 		".js": "application/javascript",
+		".jpg": "image/jpeg",
+		".png": "image/png"
 	}
 	
 	def __init__(self, root_path):
@@ -110,7 +129,11 @@ class WebApp(object):
 				res = ServerResource(self.root_path + path_info).content
 				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
 				return [str.encode(res)]
-			elif path_info == "/" or "/index.html":
+			elif path_info.endswith(ext) and ext in ServerResource.MEDIA_EXTENSIONS:
+				res = ServerResource(self.root_path + path_info).content
+				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
+				return [res]
+			elif path_info == "/" or path_info == "/index.html":
 				res = ServerResource(self.root_path + "/index.html").content
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
