@@ -126,13 +126,14 @@ class WebApp(object):
 		path_info = environ["PATH_INFO"]
 		for ext in WebApp.MIME_TABLE.keys():
 			if path_info.endswith(ext):
-				res = ServerResource(self.root_path + path_info).content
-				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
-				return [str.encode(res)]
-			elif path_info.endswith(ext) and ext in ServerResource.MEDIA_EXTENSIONS:
-				res = ServerResource(self.root_path + path_info).content
-				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
-				return [res]
+				if ext in ServerResource.MEDIA_EXTENSIONS:
+					res = ServerResource(self.root_path + path_info).content
+					start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
+					return [res]
+				else:
+					res = ServerResource(self.root_path + path_info).content
+					start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
+					return [str.encode(res)]
 			elif path_info == "/" or path_info == "/index.html":
 				res = ServerResource(self.root_path + "/index.html").content
 				start_response("200 OK", [("Content-type", "text/html")])
