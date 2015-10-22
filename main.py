@@ -36,6 +36,7 @@ class ServerResource(object):
 		".jpeg",
 		".png",
 		".gif",
+		".svg",
 		".wav",
 		".mp3",
 		".avi",
@@ -47,9 +48,11 @@ class ServerResource(object):
 			if path.endswith(ext):
 				with open(path, "rb") as f:
 					self.content = f.read()
+					break
 			else:
 				with open(path, 'r', encoding=enc) as f:
 					self.content = f.read()
+					break
 
 class WebPage(object):
 	
@@ -114,12 +117,13 @@ class WebApp(object):
 	MIME_TABLE = {
 		".txt": "text/plain",
 		".css": "text/css",
+		".less": "text/less",
 		".js": "application/javascript",
 		".jpg": "image/jpeg",
 		".png": "image/png"
 	}
 	
-	def __init__(self, root_path):
+	def __init__(self, root_path=""):
 		self.root_path = root_path
 	
 	def __call__(self, environ, start_response):
