@@ -31,9 +31,28 @@ class Server(object):
 
 class ServerResource(object):
 	
+	MEDIA_EXTENSIONS = [
+		".jpg",
+		".jpeg",
+		".png",
+		".gif",
+		".svg",
+		".wav",
+		".mp3",
+		".avi",
+		".wma"
+	]
+	
 	def __init__(self, path, enc="utf-8"):
-		self.resource = open(path, 'r', encoding=enc)
-		self.content = self.resource.read()
+		for ext in ServerResource.MEDIA_EXTENSIONS:
+			if path.endswith(ext):
+				with open(path, "rb") as f:
+					self.content = f.read()
+					break
+			else:
+				with open(path, 'r', encoding=enc) as f:
+					self.content = f.read()
+					break
 
 class WebPage(object):
 	
@@ -112,10 +131,11 @@ class WebApp(object):
 		".txt": "text/plain",
 		".css": "text/css",
 		".js": "application/javascript",
+		".jpg": "image/jpeg",
+		".png": "image/png"
 	}
 	
-	def __init__(self, resource=None, root_path='./'):
-		self.resource = resource
+	def __init__(self, root_path=""):
 		self.root_path = root_path
 	
 	def __call__(self, environ, start_response):
@@ -124,12 +144,11 @@ class WebApp(object):
 			if path_info.endswith(ext):
 				res = ServerResource(self.root_path + path_info).content
 				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
-				return [str.encode(res)]
-			elif path_info == "/" or "/index.html":
-				res = ''
-				if self.resource is not None:
-					res = str(self.resource)
+				if ext in ServerResource.MEDIA_EXTENSIONS:
+					return [res]
 				else:
-					res = ServerResource(self.root_path + "/index.html").content
+					return [str.encode(res)]
+			elif path_info == "/" or path_info == "/index.html":
+				res = ServerResource(self.root_path + "/index.html").content
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]

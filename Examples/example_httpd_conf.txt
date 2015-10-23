@@ -1,5 +1,0 @@
-<VirtualHost *:80>
-    ServerAdmin ericsonwrp@gmail.com
-    DocumentRoot G:/Insanity/Web/Apache24/htdocs
-    WSGIScriptAlias / G:/Insanity/Web/Apache24/htdocs/serv.py
-</VirtualHost>
