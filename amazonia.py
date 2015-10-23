@@ -16,7 +16,6 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#  
 
 from paste import httpserver
 from bs4 import BeautifulSoup
