@@ -1,3 +1,4 @@
-from Amazonia.main import Server, ServerResource, WebPage, WebApp
+from Amazonia import amazonia
 
-Server(WebApp("G:/Insanity/Web/Apache24/htdocs/Volapp"))
+# Server(WebApp("G:/Insanity/Web/Apache24/htdocs/Volapp"))
+amazonia.Server(amazonia.EnvPrinter())

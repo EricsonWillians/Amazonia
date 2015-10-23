@@ -1,5 +1,5 @@
 #
-#  main.py
+#  amazonia.py
 #  
 #  Copyright 2015 Ericson Willians (Rederick Deathwill) <EricsonWRP@ERICSONWRP-PC>
 #  
@@ -152,3 +152,18 @@ class WebApp(object):
 				res = ServerResource(self.root_path + "/index.html").content
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
+
+class EnvPrinter(object):
+	
+	def __call__(self, environ, start_response):
+		start_response("200 OK", [("Content-type", "text/html")])
+		return [str.encode(
+			"<html> \
+				<head> \
+					<title>Amazonia Env Printer</title> \
+				</head> \
+				<body> \
+					{env_content} \
+				</body> \
+			</html>".format(env_content = str(environ))
+		)]
