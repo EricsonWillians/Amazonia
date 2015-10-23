@@ -5,6 +5,7 @@ Amazonia is an open-source request-based WSGI-compliant web framework for Python
 * Distinguish GET from POST requests (And even other methods) without using external modules / libs, and process data accordingly.
 * Add database integration.
 * Add a templating engine (Amazonia will have its own, so no Jinja2 and other examples).
+* Add session management (Including support for recovery links)
 * Generate API docs.
 * Add RIA support.
 
