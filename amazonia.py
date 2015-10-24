@@ -19,6 +19,7 @@
 
 from paste import httpserver
 from bs4 import BeautifulSoup
+from urllib.parse import parse_qs
 import re, glob, os
 
 class Server(object):
@@ -150,7 +151,41 @@ class WebApp(object):
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
 
-class EnvPrinter(object):
+class GETHandler(WebApp):
+	
+	def __init__(self, root_path=""):
+		WebApp.__init__(self, root_path)
+		
+	def __call__(self, environ, start_response):
+		path_info = environ["PATH_INFO"]
+		if environ["QUERY_STRING"]:
+			self.query_data = parse_qs(environ["QUERY_STRING"])
+		for ext in WebApp.MIME_TABLE.keys():
+			if path_info.endswith(ext):
+				res = ServerResource(self.root_path + path_info).content
+				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
+				if ext in ServerResource.MEDIA_EXTENSIONS:
+					return [res]
+				else:
+					return [str.encode(res)]
+			elif path_info == "/" or path_info == "/index.html":
+				res = ServerResource(self.root_path + "/index.html").content
+				start_response("200 OK", [("Content-type", "text/html")])
+				return [str.encode(res)]
+			elif path_info == "/easteregg":
+				start_response("200 OK", [("Content-type", "text/html")])
+				return [str.encode(
+					"<html> \
+						<head> \
+							<title>Amazonia GET Handler</title> \
+						</head> \
+						<body> \
+							{query_data} \
+						</body> \
+					</html>".format(query_data = str(self.query_data))
+				)]
+
+class EnvPrinter(WebApp):
 	
 	def __call__(self, environ, start_response):
 		start_response("200 OK", [("Content-type", "text/html")])
