@@ -136,8 +136,7 @@ class WebApp(object):
 	def __init__(self, root_path=""):
 		self.root_path = root_path
 	
-	def __call__(self, environ, start_response):
-		path_info = environ["PATH_INFO"]
+	def get_static_content(self, path_info, start_response):
 		for ext in WebApp.MIME_TABLE.keys():
 			if path_info.endswith(ext):
 				res = ServerResource(self.root_path + path_info).content
@@ -150,40 +149,34 @@ class WebApp(object):
 				res = ServerResource(self.root_path + "/index.html").content
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
-
+	
+	def __call__(self, environ, start_response):
+		self.path_info = environ["PATH_INFO"]
+		return self.get_static_content(self.path_info, start_response)
+		
 class GETHandler(WebApp):
 	
 	def __init__(self, root_path=""):
 		WebApp.__init__(self, root_path)
 		
 	def __call__(self, environ, start_response):
-		path_info = environ["PATH_INFO"]
+		self.path_info = environ["PATH_INFO"]
 		if environ["QUERY_STRING"]:
 			self.query_data = parse_qs(environ["QUERY_STRING"])
-		for ext in WebApp.MIME_TABLE.keys():
-			if path_info.endswith(ext):
-				res = ServerResource(self.root_path + path_info).content
-				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
-				if ext in ServerResource.MEDIA_EXTENSIONS:
-					return [res]
-				else:
-					return [str.encode(res)]
-			elif path_info == "/" or path_info == "/index.html":
-				res = ServerResource(self.root_path + "/index.html").content
-				start_response("200 OK", [("Content-type", "text/html")])
-				return [str.encode(res)]
-			elif path_info == "/easteregg":
-				start_response("200 OK", [("Content-type", "text/html")])
-				return [str.encode(
-					"<html> \
-						<head> \
-							<title>Amazonia GET Handler</title> \
-						</head> \
-						<body> \
-							{query_data} \
-						</body> \
-					</html>".format(query_data = str(self.query_data))
-				)]
+		if self.path_info == "/easteregg":
+			start_response("200 OK", [("Content-type", "text/html")])
+			return [str.encode(
+				"<html> \
+					<head> \
+						<title>Amazonia GET Handler</title> \
+					</head> \
+					<body> \
+						{query_data} \
+					</body> \
+				</html>".format(query_data = str(self.query_data))
+			)]
+		else:
+			return self.get_static_content(self.path_info, start_response)
 
 class EnvPrinter(WebApp):
 	
