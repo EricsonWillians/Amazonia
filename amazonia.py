@@ -133,8 +133,9 @@ class WebApp(object):
 		".png": "image/png"
 	}
 	
-	def __init__(self, root_path=""):
+	def __init__(self, root_path, connection=None):
 		self.root_path = root_path
+		self.connection = connection
 	
 	def get_static_content(self, path_info, start_response):
 		for ext in WebApp.MIME_TABLE.keys():
@@ -150,33 +151,12 @@ class WebApp(object):
 				start_response("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
 	
+	def get_query_string(self, environ):
+		return parse_qs(environ["QUERY_STRING"])
+	
 	def __call__(self, environ, start_response):
 		self.path_info = environ["PATH_INFO"]
 		return self.get_static_content(self.path_info, start_response)
-		
-class GETHandler(WebApp):
-	
-	def __init__(self, root_path=""):
-		WebApp.__init__(self, root_path)
-		
-	def __call__(self, environ, start_response):
-		self.path_info = environ["PATH_INFO"]
-		if environ["QUERY_STRING"]:
-			self.query_data = parse_qs(environ["QUERY_STRING"])
-		if self.path_info == "/easteregg":
-			start_response("200 OK", [("Content-type", "text/html")])
-			return [str.encode(
-				"<html> \
-					<head> \
-						<title>Amazonia GET Handler</title> \
-					</head> \
-					<body> \
-						{query_data} \
-					</body> \
-				</html>".format(query_data = str(self.query_data))
-			)]
-		else:
-			return self.get_static_content(self.path_info, start_response)
 
 class EnvPrinter(WebApp):
 	
