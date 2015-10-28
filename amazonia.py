@@ -126,6 +126,7 @@ class WebPage(object):
 class WebApp(object):
 	
 	MIME_TABLE = {
+		".html": "text/html",
 		".txt": "text/plain",
 		".css": "text/css",
 		".js": "application/javascript",
