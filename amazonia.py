@@ -137,31 +137,34 @@ class WebApp(object):
 		self.root_path = root_path
 		self.connection = connection
 	
-	def get_static_content(self, path_info, start_response):
+	def fetch_static(self, env, resp):
+		path_info = env["PATH_INFO"]
 		for ext in WebApp.MIME_TABLE.keys():
 			if path_info.endswith(ext):
 				res = ServerResource(self.root_path + path_info).content
-				start_response("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
+				resp("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
 				if ext in ServerResource.MEDIA_EXTENSIONS:
 					return [res]
 				else:
 					return [str.encode(res)]
 			elif path_info == "/" or path_info == "/index.html":
 				res = ServerResource(self.root_path + "/index.html").content
-				start_response("200 OK", [("Content-type", "text/html")])
+				resp("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
 	
-	def get_query_string(self, environ):
-		return parse_qs(environ["QUERY_STRING"])
+	def fetch_query(self, env):
+		return parse_qs(env["QUERY_STRING"])
+
+	def fetch_request(self, env):
+		return env["REQUEST_METHOD"]
 	
-	def __call__(self, environ, start_response):
-		self.path_info = environ["PATH_INFO"]
-		return self.get_static_content(self.path_info, start_response)
+	def __call__(self, env, resp):
+		return self.fetch_static(env, resp)
 
 class EnvPrinter(WebApp):
 	
-	def __call__(self, environ, start_response):
-		start_response("200 OK", [("Content-type", "text/html")])
+	def __call__(self, env, resp):
+		resp("200 OK", [("Content-type", "text/html")])
 		return [str.encode(
 			"<html> \
 				<head> \
@@ -170,5 +173,5 @@ class EnvPrinter(WebApp):
 				<body> \
 					{env_content} \
 				</body> \
-			</html>".format(env_content = str(environ))
+			</html>".format(env_content = str(env))
 		)]
