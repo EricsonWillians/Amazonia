@@ -133,9 +133,8 @@ class WebApp(object):
 		".png": "image/png"
 	}
 	
-	def __init__(self, root_path, connection=None):
+	def __init__(self, root_path):
 		self.root_path = root_path
-		self.connection = connection
 	
 	def fetch_static(self, env, resp):
 		path_info = env["PATH_INFO"]
