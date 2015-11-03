@@ -47,6 +47,11 @@ class ServerResource(object):
 				with open(path, "rb") as f:
 					self.content = f.read()
 					break
+			elif path.endswith("amz"):
+				# "Templating engine" stuff comes here...
+				with open(path, 'r', encoding=enc) as f:
+					self.content = f.read()
+					break
 			else:
 				with open(path, 'r', encoding=enc) as f:
 					self.content = f.read()
@@ -126,6 +131,7 @@ class WebPage(object):
 class WebApp(object):
 	
 	MIME_TABLE = {
+		".amz": "text/html",
 		".html": "text/html",
 		".txt": "text/plain",
 		".css": "text/css",
@@ -147,8 +153,8 @@ class WebApp(object):
 					return [res]
 				else:
 					return [str.encode(res)]
-			elif path_info == "/" or path_info == "/index.html":
-				res = ServerResource(self.root_path + "/index.html").content
+			elif path_info == "/" or path_info == "/index.amz":
+				res = ServerResource(self.root_path + "/index.amz").content
 				resp("200 OK", [("Content-type", "text/html")])
 				return [str.encode(res)]
 	
