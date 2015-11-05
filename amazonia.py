@@ -20,7 +20,8 @@
 from paste import httpserver
 from bs4 import BeautifulSoup
 from urllib.parse import parse_qs
-import re, glob, os
+from parse import parse, findall
+import re, glob, os, json
 
 class Server(object):
 	
@@ -51,7 +52,16 @@ class ServerResource(object):
 				# "Templating engine" stuff comes here...
 				with open(path, 'r', encoding=enc) as f:
 					self.content = f.read()
-					break
+					self.soup = BeautifulSoup(self.content, "lxml")
+					self.json_dicts = [json.loads(' '.join(r.fixed[0].split())) for r in findall("|{}|", self.content)]
+					for json_dict in self.json_dicts:
+						for condition in json_dict:
+							if eval(condition):
+								self.soup.body.insert_before(json_dict[condition]["True"])
+							else:
+								self.soup.body.insert_before(json_dict[condition]["False"])
+					[s.extract() for s in self.soup("amz")]
+					self.content = self.soup.prettify(formatter=None)
 			else:
 				with open(path, 'r', encoding=enc) as f:
 					self.content = f.read()
