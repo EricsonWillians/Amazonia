@@ -7,7 +7,7 @@ sys.path.append("..")
 import amazonia
 
 
-root_path = "E:/Insanity/Web/Python/test"
+root_path = "E:/Insanity/Web/Python/test" # This is where your "views" are, replace it accordingly.
 """
 connection = connection = pymysql.connect(
 	host='localhost',
