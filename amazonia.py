@@ -22,6 +22,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import parse_qs
 from parse import parse, findall
 import re, glob, os, json
+from jinja2 import Environment, PackageLoader, FileSystemLoader
 
 class Server(object):
 	
@@ -141,7 +142,6 @@ class WebPage(object):
 class WebApp(object):
 	
 	MIME_TABLE = {
-		".amz": "text/html",
 		".html": "text/html",
 		".txt": "text/plain",
 		".css": "text/css",
@@ -152,21 +152,26 @@ class WebApp(object):
 	
 	def __init__(self, root_path):
 		self.root_path = root_path
+		self.env = Environment(
+			loader = FileSystemLoader(self.root_path)
+		)
 	
 	def fetch_static(self, env, resp):
 		path_info = env["PATH_INFO"]
 		for ext in WebApp.MIME_TABLE.keys():
 			if path_info.endswith(ext):
 				res = ServerResource(self.root_path + path_info).content
+				template = self.env.get_template(path_info)
 				resp("200 OK", [("Content-type", WebApp.MIME_TABLE[ext])])
 				if ext in ServerResource.MEDIA_EXTENSIONS:
 					return [res]
 				else:
-					return [str.encode(res)]
-			elif path_info == "/" or path_info == "/index.amz":
-				res = ServerResource(self.root_path + "/index.amz").content
+					return [template.render().encode('utf-8')]
+			elif path_info == "/" or path_info == "/index.html":
+				# res = ServerResource(self.root_path + "/index.html").content
+				template = self.env.get_template("/index.html")
 				resp("200 OK", [("Content-type", "text/html")])
-				return [str.encode(res)]
+				return [template.render().encode('utf-8')]
 	
 	def fetch_query(self, env):
 		return parse_qs(env["QUERY_STRING"])

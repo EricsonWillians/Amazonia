@@ -1,7 +1,14 @@
-from Amazonia import amazonia
+import sys
+import os.path
 import pymysql
+from jinja2 import Template
+sys.path.append("..")
 
-root_path = "G:/Insanity/Web/Apache24/htdocs/Volapp"
+import amazonia
+
+
+root_path = "E:/Insanity/Web/Python/test"
+"""
 connection = connection = pymysql.connect(
 	host='localhost',
 	user='root',
@@ -9,7 +16,7 @@ connection = connection = pymysql.connect(
 	db='',
 	charset='utf8mb4',
 	cursorclass=pymysql.cursors.DictCursor
-) 
+)""" 
 
 class MainApp(amazonia.WebApp):
 	
